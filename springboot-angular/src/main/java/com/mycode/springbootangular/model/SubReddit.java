@@ -1,41 +1,34 @@
 package com.mycode.springbootangular.model;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.time.Instant;
+import java.util.List;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
 @Builder
-public class Post {
+public class SubReddit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postID;
-    @NotBlank(message = "Post name cannot be empty or null")
-    private String postName;
-    @Nullable
-    private String url;
-    @Lob
-    @Nullable
+    private Long id;
+    @NotBlank(message = "Community name is required")
+    private String name;
+    @NotBlank(message = "Description is required")
     private String description;
-    private Integer voteCount;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userID", referencedColumnName = "userID")
-    private User user;
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<Post> posts;
     private Instant createdDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id", referencedColumnName = "id")
-    private SubReddit subReddit;
-
+    private User user;
 
 }
