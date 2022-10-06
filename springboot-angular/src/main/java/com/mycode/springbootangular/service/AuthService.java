@@ -1,30 +1,31 @@
 package com.mycode.springbootangular.service;
 
 import com.mycode.springbootangular.dto.RegisterRequest;
+import com.mycode.springbootangular.exceptions.SpringRedditException;
 import com.mycode.springbootangular.model.NotificationEmail;
 import com.mycode.springbootangular.model.User;
 import com.mycode.springbootangular.model.VerificationToken;
 import com.mycode.springbootangular.repository.UserRepository;
 import com.mycode.springbootangular.repository.VerificationTokenRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import javax.transaction.Transactional;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private VerificationTokenRepository verificationTokenRepository;
-    @Autowired
-    private MailService mailService;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final MailService mailService;
 
     @Transactional
     public void signUp(RegisterRequest registerRequest) {
@@ -49,6 +50,18 @@ public class AuthService {
         verificationToken.setUser(user);
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
 
+    public void verifyAccount(String token) {
+        Optional<VerificationToken> optionalVerificationToken = verificationTokenRepository.findByToken(token);
+        fetchUserAndEnable(optionalVerificationToken.orElseThrow(() -> new SpringRedditException("Invalid token")));
+    }
+
+    private void fetchUserAndEnable(VerificationToken verificationToken) {
+        String userName = verificationToken.getUser().getUserName();
+        User user = userRepository.findByUserName(userName).orElseThrow(()->new SpringRedditException("User not found with name: " +
+                ""+userName));
+        user.setEnabled(true);
+        userRepository.save(user);
     }
 }
