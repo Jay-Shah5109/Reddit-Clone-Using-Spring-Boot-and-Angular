@@ -20,7 +20,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long postID;
+    private Long userID;
     @NotBlank(message = "Username is required")
     private String userName;
     @NotBlank(message = "Password is required")
